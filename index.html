@@ -1,0 +1,364 @@
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Full-Funnel Performance View</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f3f4f6;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --accent:#ffdee8;
+      --accent2:#ffd4df;
+      --divider:#e5e7eb;
+      --shadow:0 8px 24px rgba(16,24,40,.08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text);
+      background:var(--bg);
+    }
+    .page{
+      max-width:1200px;
+      margin:28px auto 60px;
+      padding:0 20px;
+    }
+    .header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:12px;
+    }
+    h1{
+      font-size:22px;
+      font-weight:600;
+      margin:0;
+      letter-spacing:.2px;
+    }
+    .view-details{
+      font-size:14px;
+      color:#111827;
+      opacity:.7;
+      text-decoration:none;
+      font-weight:500;
+    }
+    .card{
+      position:relative;
+      border-radius:14px;
+      background:var(--card);
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      border:1px solid #eee;
+    }
+    /* soft pink wash matching design */
+    .card::before,
+    .card::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(1200px 380px at -10% -40%, var(--accent) 0%, transparent 55%),
+        radial-gradient(900px 300px at -15% 110%, var(--accent2) 0%, transparent 60%);
+      pointer-events:none;
+      z-index:0;
+    }
+    .card-inner{
+      position:relative;
+      z-index:1;
+      padding:18px 18px 18px 18px;
+    }
+    .top-row{
+      display:flex;
+      justify-content:flex-end;
+      margin-bottom:8px;
+    }
+    .select-wrap{
+      position:relative;
+    }
+    select{
+      appearance:none;
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      background:#fff;
+      border:1px solid #d1d5db;
+      border-radius:10px;
+      padding:12px 40px 12px 14px;
+      font-size:14px;
+      color:#111827;
+      outline:none;
+      min-width:200px;
+      box-shadow:0 1px 0 rgba(0,0,0,.02);
+    }
+    .select-wrap::after{
+      content:"▾";
+      position:absolute;
+      right:12px;
+      top:50%;
+      transform:translateY(-50%);
+      color:#6b7280;
+      font-size:14px;
+      pointer-events:none;
+    }
+
+    .content{
+      display:grid;
+      grid-template-columns: 1.1fr 1.5fr 1.1fr;
+      gap:0;
+      align-items:stretch;
+      border-top:1px solid transparent; /* for consistent padding feel */
+    }
+
+    .col{padding:14px 18px;}
+    .col + .col{border-left:1px solid var(--divider);}
+    .metric-title{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      color:#374151;
+      font-size:14px;
+      font-weight:600;
+      margin:4px 0 8px;
+    }
+    .i{
+      width:16px;height:16px;border-radius:50%;
+      display:inline-flex;align-items:center;justify-content:center;
+      font-size:11px;font-weight:700;background:#eef2f7;color:#6b7280;
+      border:1px solid #e5e7eb;
+    }
+
+    .big-number{
+      font-size:44px;
+      font-weight:700;
+      letter-spacing:.3px;
+      margin:6px 0 8px;
+    }
+
+    /* platform grids */
+    .section-block + .section-block{margin-top:14px;padding-top:14px;border-top:1px solid var(--divider);}
+    .kv-grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px 18px;
+    }
+    .kv{
+      display:flex;flex-direction:column;gap:2px;
+    }
+    .kv .k{
+      font-size:13px;color:#6b7280;font-weight:500;
+    }
+    .kv .v{
+      font-size:22px;font-weight:700;color:#111827;
+      letter-spacing:.2px;
+    }
+
+    /* right side (video views) with inner divider */
+    .video-cols{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:0;
+      height:100%;
+    }
+    .video-cols > div{
+      padding:6px 16px;
+    }
+    .video-cols > div + div{border-left:1px solid var(--divider);}
+    .video-value{
+      font-size:28px;font-weight:800;margin-top:6px;
+    }
+
+    @media (max-width: 980px){
+      .content{grid-template-columns:1fr; }
+      .col + .col{border-left:none;border-top:1px solid var(--divider);}
+      .video-cols{grid-template-columns:1fr; }
+      .video-cols > div + div{border-left:none;border-top:1px solid var(--divider);}
+      .big-number{font-size:36px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <h1>Full-Funnel Performance View</h1>
+      <a class="view-details" href="#" aria-label="View details">View details</a>
+    </div>
+
+    <div class="card">
+      <div class="card-inner">
+        <div class="top-row">
+          <label class="select-wrap" aria-label="Select Market">
+            <select id="marketSelect">
+              <option value="" disabled="">Select Market</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="content">
+          <!-- LEFT: Total spend -->
+          <div class="col">
+            <div class="metric-title">Total Digital Spend <span class="i" title="Info">i</span></div>
+            <div id="totalSpend" class="big-number">$0</div>
+          </div>
+
+          <!-- MIDDLE: Platform Spend + Engagement -->
+          <div class="col">
+            <div class="section-block">
+              <div class="metric-title">Spend by platform ($) <span class="i" title="Info">i</span></div>
+              <div id="spendGrid" class="kv-grid"></div>
+            </div>
+            <div class="section-block">
+              <div class="metric-title">Engagement by platform <span class="i" title="Info">i</span></div>
+              <div id="engGrid" class="kv-grid"></div>
+            </div>
+          </div>
+
+          <!-- RIGHT: Video Views -->
+          <div class="col">
+            <div class="video-cols">
+              <div>
+                <div class="metric-title">Video Views <span class="i" title="Info">i</span></div>
+                <div id="videoTotal" class="video-value">0</div>
+              </div>
+              <div>
+                <div class="metric-title">Video Views <span class="i" title="Info">i</span> <span style="margin-left:6px;color:#6b7280;font-weight:500;">Completed</span></div>
+                <div id="videoCompleted" class="video-value">0</div>
+              </div>
+            </div>
+          </div>
+        </div> <!-- /content -->
+      </div> <!-- /card-inner -->
+    </div> <!-- /card -->
+  </div>
+
+  <script>
+    // JSON-like data variable powering the page
+    const marketsData = {
+      "United States": {
+        totalDigitalSpend: 3640000,
+        spendByPlatform: {
+          Meta: 915000, TikTok: 323300, SnapChat: 199700,
+          Amazon: 240100, DV360: 277500, TradeDesk: 145200
+        },
+        engagementByPlatform: {
+          Meta: 30100000, TikTok: 42300000, SnapChat: 12400000,
+          Amazon: 10100000, DV360: 22500000, TradeDesk: 11200000
+        },
+        videoViews: { total: 287670000, completed: 221350000 }
+      },
+      "United Kingdom": {
+        totalDigitalSpend: 1825000,
+        spendByPlatform: {
+          Meta: 465000, TikTok: 211300, SnapChat: 98700,
+          Amazon: 150200, DV360: 182400, TradeDesk: 73100
+        },
+        engagementByPlatform: {
+          Meta: 15100000, TikTok: 18200000, SnapChat: 7400000,
+          Amazon: 5200000, DV360: 10100000, TradeDesk: 4900000
+        },
+        videoViews: { total: 141200000, completed: 112500000 }
+      },
+      Germany: {
+        totalDigitalSpend: 1520000,
+        spendByPlatform: {
+          Meta: 402000, TikTok: 175300, SnapChat: 80200,
+          Amazon: 130400, DV360: 165500, TradeDesk: 62000
+        },
+        engagementByPlatform: {
+          Meta: 12100000, TikTok: 16100000, SnapChat: 5200000,
+          Amazon: 4800000, DV360: 8700000, TradeDesk: 4100000
+        },
+        videoViews: { total: 112300000, completed: 87300000 }
+      },
+      India: {
+        totalDigitalSpend: 980000,
+        spendByPlatform: {
+          Meta: 260000, TikTok: 0, SnapChat: 55000,
+          Amazon: 70000, DV360: 210000, TradeDesk: 39000
+        },
+        engagementByPlatform: {
+          Meta: 20100000, TikTok: 0, SnapChat: 7200000,
+          Amazon: 5600000, DV360: 13400000, TradeDesk: 3200000
+        },
+        videoViews: { total: 198500000, completed: 151000000 }
+      },
+      Brazil: {
+        totalDigitalSpend: 1240000,
+        spendByPlatform: {
+          Meta: 330000, TikTok: 204000, SnapChat: 64000,
+          Amazon: 88000, DV360: 190000, TradeDesk: 51000
+        },
+        engagementByPlatform: {
+          Meta: 17000000, TikTok: 19300000, SnapChat: 6800000,
+          Amazon: 4300000, DV360: 9900000, TradeDesk: 3600000
+        },
+        videoViews: { total: 165000000, completed: 128400000 }
+      }
+    };
+
+    const platformsOrder = ["Meta","TikTok","SnapChat","Amazon","DV360","TradeDesk"];
+
+    const sel = document.getElementById('marketSelect');
+    const totalSpendEl = document.getElementById('totalSpend');
+    const videoTotalEl = document.getElementById('videoTotal');
+    const videoCompletedEl = document.getElementById('videoCompleted');
+    const spendGrid = document.getElementById('spendGrid');
+    const engGrid = document.getElementById('engGrid');
+
+    // Utilities
+    function shortNumber(n, withCurrency=false){
+      const abs = Math.abs(n);
+      const sign = n < 0 ? "-" : "";
+      const format = (v, suffix) => (withCurrency ? "$" : "") + v + suffix;
+
+      if (abs >= 1_000_000_000) return sign + format((abs/1_000_000_000).toFixed(abs % 1_000_000_000 === 0 ? 0 : 1), "B");
+      if (abs >= 1_000_000) return sign + format((abs/1_000_000).toFixed(abs % 1_000_000 === 0 ? 0 : 2).replace(/\.0+$/,""), "M");
+      if (abs >= 1_000) return sign + format((abs/1_000).toFixed(abs % 1_000 === 0 ? 0 : 1).replace(/\.0$/,""), "K");
+      return sign + format(abs.toString(), "");
+    }
+
+    function buildKVGrid(container, dataObj, isCurrency){
+      container.innerHTML = "";
+      platformsOrder.forEach(p => {
+        const wrap = document.createElement('div');
+        wrap.className = 'kv';
+        const k = document.createElement('div');
+        k.className = 'k';
+        k.textContent = p;
+        const v = document.createElement('div');
+        v.className = 'v';
+        const val = dataObj[p] ?? 0;
+        v.textContent = shortNumber(val, isCurrency);
+        wrap.appendChild(k);
+        wrap.appendChild(v);
+        container.appendChild(wrap);
+      });
+    }
+
+    function updateUI(market){
+      const d = marketsData[market];
+      if (!d) return;
+      totalSpendEl.textContent = shortNumber(d.totalDigitalSpend, true);
+      buildKVGrid(spendGrid, d.spendByPlatform, true);
+      buildKVGrid(engGrid, d.engagementByPlatform, false);
+      videoTotalEl.textContent = shortNumber(d.videoViews.total, false);
+      videoCompletedEl.textContent = shortNumber(d.videoViews.completed, false);
+    }
+
+    // Populate select and initialize
+    (function init(){
+      Object.keys(marketsData).forEach((m,i)=>{
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        if (i===0) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      updateUI(sel.value || Object.keys(marketsData)[0]);
+    })();
+
+    sel.addEventListener('change', e => updateUI(e.target.value));
+  </script>
+
+</body></html>
