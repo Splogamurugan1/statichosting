@@ -26,56 +26,43 @@
 
 <script>
     async function fetchAllianzNews() {
-        const container = document.getElementById('news-container');
+    const container = document.getElementById('news-container');
+    // Primary URL. If this fails, Allianz may have removed the RSS file.
+    const RSS_URL = 'https://www.allianz.com';
+    
+    // Alternative Proxy
+    const PROXY_URL = `https://corsproxy.io{encodeURIComponent(RSS_URL)}`;
+
+    try {
+        const response = await fetch(PROXY_URL);
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
         
-        // Allianz RSS endpoint
-        const RSS_URL = 'https://www.allianz.com';
-        // Using AllOrigins proxy to bypass CORS restrictions
-        const PROXY_URL = `https://api.allorigins.win{encodeURIComponent(RSS_URL)}`;
-
-        try {
-            const response = await fetch(PROXY_URL);
-            if (!response.ok) throw new Error('Network response was not ok');
-            
-            const xmlText = await response.text();
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-            
-            // Look for news items
-            const items = xmlDoc.querySelectorAll("item");
-            
-            if (items.length === 0) {
-                container.innerHTML = "No news items found.";
-                return;
-            }
-
-            let htmlContent = '<ul>';
-            items.forEach(item => {
-                const title = item.querySelector("title")?.textContent || "No Title";
-                const link = item.querySelector("link")?.textContent || "#";
-                const pubDate = item.querySelector("pubDate")?.textContent || "";
-                
-                // Format the date nicely
-                const formattedDate = pubDate ? new Date(pubDate).toLocaleDateString(undefined, {
-                    year: 'numeric', month: 'long', day: 'numeric'
-                }) : "";
-
-                htmlContent += `
-                    <li>
-                        <a href="${link}" target="_blank" rel="noopener">${title}</a>
-                        <span class="date">${formattedDate}</span>
-                    </li>`;
-            });
-            htmlContent += '</ul>';
-
-            container.classList.remove('loading');
-            container.innerHTML = htmlContent;
-
-        } catch (error) {
-            console.error('Fetch error:', error);
-            container.innerHTML = '<p class="error">Unable to load news. The RSS feed may be temporarily unavailable or blocked.</p>';
+        const xmlText = await response.text();
+        if (xmlText.includes("403 Forbidden") || xmlText.includes("Cloudflare")) {
+            throw new Error("Access Blocked by Allianz Security");
         }
+
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+        const items = xmlDoc.querySelectorAll("item");
+
+        if (items.length === 0) {
+            container.innerHTML = "No news items found. The feed structure may have changed.";
+            return;
+        }
+
+        let html = '<ul>';
+        items.forEach(item => {
+            const title = item.querySelector("title")?.textContent;
+            const link = item.querySelector("link")?.textContent;
+            html += `<li><a href="${link}" target="_blank">${title}</a></li>`;
+        });
+        container.innerHTML = html + '</ul>';
+
+    } catch (error) {
+        container.innerHTML = `<p class="error">Error: ${error.message}. Allianz may have disabled this feed.</p>`;
     }
+}
 
     // Initialize fetch on page load
     window.onload = fetchAllianzNews;
